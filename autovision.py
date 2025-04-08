@@ -271,13 +271,12 @@ DEFAULT_API_KEY = "AIzaSyCxK_S56Rr4GPajz-OljM9HssxEj6ht7ww"
 DEFAULT_PROMPT = "Be concise Analyze the image and describe it as if you're guiding a blind friend. Provide essential navigation details and alert about any illegal, dangerous, or suspicious elements. Use an informal tone, be concise, and avoid repetition. If you notice any questions, provide solutions. If you see lyrics or references to a song, identify the song and artist. Mention any famous individuals, like political leaders or singers, you recognize. Keep it brief and to the point."
 
 
-
-def speak(text):
+def speak(text, output_path='output_audio.mp3'):
     engine = pyttsx3.init()
     voices = engine.getProperty('voices')
     engine.setProperty('rate', 200)
     engine.setProperty('voice', voices[0].id)
-    engine.say(text)
+    engine.save_to_file(text, output_path)  # Save the audio to a file
     engine.runAndWait()
 
 def capture_and_analyze(apikey, prompt, image_path):
@@ -301,16 +300,16 @@ def index():
     return render_template('index.html')
 
 @app.route('/analyze', methods=['POST'])
+@app.route('/analyze', methods=['POST'])
 def analyze():
-    data = request.json
-    
+    data = request.form  # Use form data since the frontend sends a form
 
     image_data = data.get('image_data')
 
     if not image_data:
         return jsonify({'error': 'Image data is required'}), 400
-    
-    image_data = image_data.split(",")[1]  
+
+    image_data = image_data.split(",")[1]
     image_bytes = Image.open(BytesIO(base64.b64decode(image_data)))
 
     # Generate a unique filename based on the current timestamp
@@ -321,11 +320,20 @@ def analyze():
     # Analyze the image and get the result
     result = capture_and_analyze(DEFAULT_API_KEY, DEFAULT_PROMPT, temp_image_path)
 
+    # Generate audio file for the result
+    audio_path = os.path.join(IMAGE_DIR, f'result_audio_{timestamp}.mp3')
+    speak(result, output_path=audio_path)
+
     # Log the response to a text file
     with open(LOG_FILE, 'a') as log_file:
         log_file.write(f"Image: {temp_image_path}, Result: {result}\n")
 
-    return jsonify({'result': result})
+    # Render the result.html template with the result, image, and audio file
+    return render_template('result.html', result=result, image_url=f'/captured_images/{os.path.basename(temp_image_path)}', audio_url=f'/captured_images/{os.path.basename(audio_path)}')
+
+@app.route('/captured_images/<path:filename>')
+def serve_file(filename):
+    return send_from_directory(IMAGE_DIR, filename)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))  # Use the PORT environment variable provided by Render

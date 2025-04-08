@@ -1,0 +1,20 @@
+<!-- filepath: c:\Users\USER\Desktop\AutoVision_Project-master\templates\result.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Analysis Result</title>
+</head>
+<body>
+    <h1>Image Analysis Result</h1>
+    <p><strong>Description:</strong> {{ result }}</p>
+    <p><strong>Analyzed Image:</strong></p>
+    <img src="{{ image_url }}" alt="Analyzed Image" style="max-width: 100%; height: auto;">
+    <p><strong>Audio Description:</strong></p>
+    <audio controls autoplay>
+        <source src="{{ audio_url }}" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+</body>
+</html>
