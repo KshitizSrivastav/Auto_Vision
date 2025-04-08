@@ -328,11 +328,5 @@ def analyze():
     return jsonify({'result': result})
 
 if __name__ == '__main__':
-    port = 5000
-    
-    # # Connect ngrok using your static domain
-    # public_url = ngrok.connect(port, domain='marmot-clever-correctly.ngrok-free.app').public_url  
-   
-    # print(f" * ngrok tunnel \"{public_url}\" -> \"http://127.0.0.1:{port}\"")
-    
-    app.run(port=port,debug=True)
+    port = int(os.environ.get('PORT', 5000))  # Use the PORT environment variable provided by Render
+    app.run(host='0.0.0.0', port=port, debug=False)  # Bind to 0.0.0.0 for external access
