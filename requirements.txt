@@ -1,0 +1,4 @@
+Flask==2.2.2
+Pillow==9.3.0
+pyttsx3==2.90
+pyngrok==5.1.0
